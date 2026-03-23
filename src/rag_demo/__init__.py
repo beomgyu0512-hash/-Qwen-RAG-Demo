@@ -1,0 +1,2 @@
+"""Qwen manufacturing RAG demo."""
+

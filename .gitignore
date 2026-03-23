@@ -1,0 +1,7 @@
+.env
+.venv/
+.pycache/
+__pycache__/
+.pytest_cache/
+data/chroma/
+data/uploads/

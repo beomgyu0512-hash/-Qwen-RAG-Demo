@@ -1,29 +1,34 @@
 # 基于 Qwen 的智能制造知识库问答 RAG Demo
 
-这是一个适合写进算法/大模型应用实习简历的最小闭环项目，目标是完成：
+一个面向智能制造场景的轻量级 RAG Demo，支持行业文档上传、文本切分、向量检索、答案生成和参考片段展示。项目默认内置 5 份半导体/制造业示例资料，可直接用于本地演示。
 
-- 制造业资料上传与解析
-- 文档自动切分
-- 向量建库与检索
-- 基于 Qwen API 的答案生成
-- 参考片段回显
+## 功能概览
 
-项目默认内置了 5 份半导体/智能制造示例资料，可以直接用于本地演示。
+- 支持 `md / txt / pdf / docx` 多格式文档接入
+- 基于 Qwen 兼容接口完成 Embedding 与回答生成
+- 使用 Chroma 构建本地向量库并进行 Top-K 检索
+- 返回答案的同时展示参考片段，便于人工校验
+- 提供 24 条测试问答和批量评测脚本
 
-## 项目亮点
+## 技术栈
 
-- 面向智能制造场景，问题贴近晶圆制造、缺陷检测、良率分析等面试高频主题
-- 用 `Qwen + Chroma + LangChain Text Splitter + Gradio` 搭出完整 RAG 闭环
-- 支持上传 `md / txt / pdf / docx` 资料，便于快速扩展知识库
-- 回答附带参考片段，适合展示“基于知识库回答”而不是纯聊天
+- Python
+- Qwen API / OpenAI 兼容接口
+- LangChain Text Splitters
+- Chroma
+- Gradio
 
-## 目录结构
+## 项目结构
 
 ```text
 .
 ├── app.py
 ├── data
-│   └── docs
+│   ├── docs
+│   ├── eval
+│   └── uploads
+├── docs
+├── scripts
 ├── requirements.txt
 └── src
     └── rag_demo
@@ -39,28 +44,30 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. 配置环境变量
+2. 复制环境变量模板
 
 ```bash
 cp .env.example .env
 ```
 
-如果你使用阿里云 DashScope 的 Qwen 兼容接口，可以按下面填写：
+3. 填写模型配置
+
+如果使用阿里云 DashScope 的 Qwen 兼容接口，可参考以下配置：
 
 ```env
-OPENAI_API_KEY=你的 DashScope Key
+OPENAI_API_KEY=your_dashscope_key
 OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 CHAT_MODEL=qwen-plus
 EMBEDDING_MODEL=text-embedding-v3
 ```
 
-3. 启动 Demo
+4. 启动 Demo
 
 ```bash
 python app.py
 ```
 
-启动后进入页面，先点击“重建知识库”，再输入问题即可。
+启动后打开终端输出的本地地址，先点击“重建知识库”，再输入问题。
 
 ## 示例问题
 
@@ -69,20 +76,42 @@ python app.py
 - 半导体缺陷检测常见方法有哪些？
 - SPC 在良率提升中起什么作用？
 
-## 适合写在简历上的表述
+## 测试问答集
 
-你可以把这个项目写成：
+项目内置 24 条人工整理的测试问答，位于 [data/eval/test_qa.csv](data/eval/test_qa.csv)。  
+每条记录包含问题、标准答案要点和来源文档，可用于人工验证或扩展自动评测。
 
-> 基于 Qwen API、Chroma 与 Gradio 搭建智能制造知识库问答系统，完成制造业文档解析、文本切分、向量检索与答案生成闭环；支持多格式资料上传和参考片段回显，提升垂直领域问答准确性与可解释性。
+## 批量评测
 
-如果要再强化一点，可以补充两条：
+运行以下命令可批量执行测试问答，并导出 `csv + md` 结果：
 
-- 设计面向制造场景的中文 Prompt，约束模型基于检索片段作答，降低幻觉
-- 通过 Top-K 检索与分块策略优化知识召回效果，提升回答相关性
+```bash
+python scripts/evaluate_rag.py
+```
 
-## 后续可扩展方向
+常用参数：
 
-- 加入问答评测集，统计命中率与答案一致性
-- 增加重排序模型，提高检索质量
-- 引入 Agent，将“问答、总结、术语解释、工艺对比”做成多工具流程
-- 后续替换为本地部署开源模型，扩展成“部署 + 应用”组合项目
+```bash
+python scripts/evaluate_rag.py --top-k 4 --input data/eval/test_qa.csv --output-dir data/eval/results
+```
+
+输出目录：
+
+- `data/eval/results/eval_result_<timestamp>.csv`
+- `data/eval/results/eval_report_<timestamp>.md`
+
+说明：
+
+- 如果知识库尚未建立，脚本会先基于 `data/docs` 自动建库
+- 当前评测逻辑采用“答案要点覆盖率”启发式检查，适合快速筛查；正式评估建议结合人工复核
+
+## 开发记录
+
+项目开发过程中的兼容性问题、环境处理和结构调整记录见 [docs/development-notes.md](docs/development-notes.md)。
+
+## 后续方向
+
+- 增加重排序模型，提升检索精度
+- 增加自动化评测指标与结果汇总
+- 支持更多制造业资料和更细的工艺主题
+- 替换为本地部署模型，扩展为完整的“部署 + 应用”示例

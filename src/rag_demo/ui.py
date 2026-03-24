@@ -23,12 +23,12 @@ def build_demo() -> gr.Blocks:
     with gr.Blocks(title="Qwen 智能制造 RAG Demo") as demo:
         gr.Markdown(
             """
-            # 基于 Qwen 的智能制造知识库问答 RAG Demo
-            支持 `制造业/半导体资料上传 -> 自动切分 -> 向量检索 -> Qwen 生成答案 -> 参考片段展示`。
+            # Qwen 智能制造知识库 Demo
+            上传制造业资料后可重建知识库，并基于检索片段生成回答与参考引用。
 
-            - 不上传文件时，会默认使用仓库内置的半导体示例资料建库
-            - 上传 `md / txt / pdf / docx` 后，会和内置资料一起进入知识库
-            - 首次使用前请先配置 `.env` 中的 Qwen 兼容 API Key
+            - 默认使用仓库内置的半导体示例资料
+            - 支持 `md / txt / pdf / docx`
+            - 首次使用前请先在 `.env` 中配置 Qwen 兼容 API Key
             """
         )
 
